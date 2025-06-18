@@ -1,19 +1,41 @@
 #!/bin/bash
 
+echo "Running pre-push hook..."
+
 # Extract the current version from Cargo.toml
 CURRENT_VERSION=$(grep '^version = ' Cargo.toml | sed -E 's/version = "(.*)"/\1/')
+if [[ -z "$CURRENT_VERSION" ]]; then
+  echo "Error: Version not found in Cargo.toml"
+  exit 1
+fi
+echo "Current version: $CURRENT_VERSION"
 
 # Split the version into major, minor, and patch
 IFS='.' read -r MAJOR MINOR PATCH <<<"$CURRENT_VERSION"
 
-# Increment the minor version
+# Increment the patch version
 NEW_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
+echo "New version: $NEW_VERSION"
 
 # Update the version in Cargo.toml
 sed -i "s/version = \"$CURRENT_VERSION\"/version = \"$NEW_VERSION\"/" Cargo.toml
+echo "Cargo.toml updated successfully."
 
 # Update the version in README.md
 sed -i "s/releases\/download\/v[0-9]\+\.[0-9]\+\.[0-9]\+/releases\/download\/v$NEW_VERSION/" README.md
+echo "README.md updated successfully."
 
 # Stage the changes
 git add Cargo.toml README.md
+echo "Changes staged successfully."
+
+# Handle potential tag conflicts
+TAG="v$NEW_VERSION"
+if git tag -l | grep -q "$TAG"; then
+  echo "Tag $TAG already exists. Deleting and recreating..."
+  git tag -d "$TAG"
+fi
+
+# Create the new tag
+git tag "$TAG"
+echo "Tag $TAG created successfully."
