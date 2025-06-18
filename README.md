@@ -1,5 +1,7 @@
 # Linux Toolkit
 
+Successor to **auto-secure-linux**.
+
 ## Install
 
 **If `curl` doesn't work, then change `v0.0.4` to current highest (or preferred) version.**
