@@ -1,6 +1,6 @@
 # Linux Toolkit
 
-Successor to **auto-secure-linux**.
+Successor to [auto-secure-linux](https://github.com/d3vop-llc/auto-secure-linux).
 
 ## Install
 
