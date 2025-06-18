@@ -4,14 +4,14 @@ Successor to [auto-secure-linux](https://github.com/d3vop-llc/auto-secure-linux)
 
 ## Install
 
-**If `curl` doesn't work, then change `v0.0.6` to current highest (or preferred) version.**
+**If `curl` doesn't work, then change `v0.0.7` to current highest (or preferred) version.**
 
 ### Seperate Commands
 
 Download binary
 
 ```bash
-sudo curl -L "https://github.com/d3vop-llc/linux-toolkit/releases/download/v0.0.6/linux-toolkit" -o /usr/bin/linux-toolkit
+sudo curl -L "https://github.com/d3vop-llc/linux-toolkit/releases/download/v0.0.7/linux-toolkit" -o /usr/bin/linux-toolkit
 ```
 
 Allow binary to be executed
@@ -29,7 +29,7 @@ linux-toolkit
 ### All in one command
 
 ```bash
-sudo curl -L "https://github.com/d3vop-llc/linux-toolkit/releases/download/v0.0.6/linux-toolkit" -o /usr/bin/linux-toolkit
+sudo curl -L "https://github.com/d3vop-llc/linux-toolkit/releases/download/v0.0.7/linux-toolkit" -o /usr/bin/linux-toolkit
 sudo chmod +x /usr/bin/linux-toolkit
 linux-toolkit
 ```
