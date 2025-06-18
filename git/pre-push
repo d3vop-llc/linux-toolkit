@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Extract the current version from Cargo.toml
+CURRENT_VERSION=$(grep '^version = ' Cargo.toml | sed -E 's/version = "(.*)"/\1/')
+
+# Split the version into major, minor, and patch
+IFS='.' read -r MAJOR MINOR PATCH <<<"$CURRENT_VERSION"
+
+# Increment the minor version
+NEW_VERSION="$MAJOR.$((MINOR + 1)).0"
+
+# Update the version in Cargo.toml
+sed -i "s/version = \"$CURRENT_VERSION\"/version = \"$NEW_VERSION\"/" Cargo.toml
+
+# Update the version in README.md
+sed -i "s/releases\/download\/v[0-9]+\.[0-9]+\.[0-9]+/releases\/download\/v$NEW_VERSION/" README.md
+
+# Stage the changes
+git add Cargo.toml README.md
+
+# Commit the changes
+git commit -m "Bump version to $NEW_VERSION"
