@@ -1,4 +1,4 @@
-use std::{ process::Command, process::ExitStatus, thread, time::Duration };
+use std::{process::Command, process::ExitStatus, thread, time::Duration};
 
 pub fn run_command(
     sudo: bool,
@@ -6,7 +6,7 @@ pub fn run_command(
     failure_message_1: &str,
     args: Vec<&str>,
     success_message_1: &str,
-    failure_message_2: &str
+    failure_message_2: &str,
 ) {
     print!("\x1B[2J\x1B[1;1H");
     println!("\x1b[42;1m{}\x1b[0m", message_1);
