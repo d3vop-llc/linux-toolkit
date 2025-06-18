@@ -13,4 +13,7 @@ NEW_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
 sed -i "s/version = \"$CURRENT_VERSION\"/version = \"$NEW_VERSION\"/" Cargo.toml
 
 # Update the version in README.md
-sed -i "s/releases\/download\/v[0-9]+\.[0-9]+\.[0-9]+/releases\/download\/v$NEW_VERSION/" README.md
+sed -i "s/releases\/download\/v[0-9]\+\.[0-9]\+\.[0-9]\+/releases\/download\/v$NEW_VERSION/" README.md
+
+# Stage the changes
+git add Cargo.toml README.md
