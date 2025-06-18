@@ -6,13 +6,19 @@
 
 ### Seperate Commands
 
+Download binary
+
 ```bash
 sudo curl -L "https://github.com/d3vop-llc/linux-toolkit/releases/download/v0.0.3/linux-toolkit" -o /usr/bin/linux-toolkit
 ```
 
+Allow binary to be executed
+
 ```bash
 sudo chmod +x /usr/bin/linux-toolkit
 ```
+
+Run binary
 
 ```bash
 linux-toolkit
