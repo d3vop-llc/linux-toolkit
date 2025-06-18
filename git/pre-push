@@ -38,7 +38,6 @@ if [[ $? -ne 0 ]]; then
   exit 1
 fi
 
-# Update the version in the text
 sed -i "s/\`v[0-9]\+\.[0-9]\+\.[0-9]\`/\`v$NEW_VERSION\`/" README.md
 if [[ $? -ne 0 ]]; then
   echo "Failed to update README.md (text)"
@@ -49,6 +48,14 @@ echo "README.md updated successfully."
 # Stage the changes
 git add Cargo.toml README.md
 echo "Changes staged successfully."
+
+# Commit the changes
+git commit -m "Bump version to $NEW_VERSION" --no-verify
+if [[ $? -ne 0 ]]; then
+  echo "Failed to commit changes"
+  exit 1
+fi
+echo "Changes committed successfully."
 
 # Handle potential tag conflicts
 TAG="v$NEW_VERSION"
