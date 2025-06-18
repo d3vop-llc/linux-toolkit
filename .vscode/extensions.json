@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "rust-lang.rust-analyzer",
+    "dustypomerleau.rust-syntax",
+    "usernamehw.errorlens",
+    "IgorSbitnev.error-gutters",
+    "streetsidesoftware.code-spell-checker",
+    "natqe.reload",
+    "shardulm94.trailing-spaces"
+  ]
+}
