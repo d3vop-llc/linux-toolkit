@@ -7,7 +7,7 @@ CURRENT_VERSION=$(grep '^version = ' Cargo.toml | sed -E 's/version = "(.*)"/\1/
 IFS='.' read -r MAJOR MINOR PATCH <<<"$CURRENT_VERSION"
 
 # Increment the minor version
-NEW_VERSION="$MAJOR.$((MINOR + 1)).0"
+NEW_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
 
 # Update the version in Cargo.toml
 sed -i "s/version = \"$CURRENT_VERSION\"/version = \"$NEW_VERSION\"/" Cargo.toml
