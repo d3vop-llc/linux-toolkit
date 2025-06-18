@@ -18,11 +18,19 @@ NEW_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
 echo "New version: $NEW_VERSION"
 
 # Update the version in Cargo.toml
-sed -i "" "s/version = \"$CURRENT_VERSION\"/version = \"$NEW_VERSION\"/" Cargo.toml
+sed -i "s/version = \"$CURRENT_VERSION\"/version = \"$NEW_VERSION\"/" Cargo.toml
+if [[ $? -ne 0 ]]; then
+  echo "Failed to update Cargo.toml"
+  exit 1
+fi
 echo "Cargo.toml updated successfully."
 
 # Update the version in README.md
-sed -i "" "s/releases\/download\/v[0-9]\+\.[0-9]\+\.[0-9]\+/releases\/download\/v$NEW_VERSION/" README.md
+sed -i "s/releases\/download\/v[0-9]\+\.[0-9]\+\.[0-9]\+/releases\/download\/v$NEW_VERSION/" README.md
+if [[ $? -ne 0 ]]; then
+  echo "Failed to update README.md"
+  exit 1
+fi
 echo "README.md updated successfully."
 
 # Stage the changes
