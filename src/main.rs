@@ -7,7 +7,7 @@ fn page_1() {
     println!("Please enter your choice:");
     let mut input = String::new();
     io::stdin().read_line(&mut input).expect("\x1b[31mFailed to read line\x1b[0m");
-    let choice: i32 = input.trim().parse().expect("Please enter a valid number");
+    let choice: u8 = input.trim().parse().expect("Please enter a valid number");
     match choice {
         1 => {
             let args: Vec<&str> = vec!["sh", "-c", "apt-get update"];
