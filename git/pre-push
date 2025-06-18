@@ -45,8 +45,10 @@ if [[ $? -ne 0 ]]; then
 fi
 echo "README.md updated successfully."
 
+./build.sh
+
 # Stage the changes
-git add Cargo.toml README.md
+git add Cargo.toml Cargo.lock README.md
 echo "Changes staged successfully."
 
 # Commit the changes
