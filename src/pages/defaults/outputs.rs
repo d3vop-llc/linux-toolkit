@@ -1,8 +1,8 @@
 use crate::pages::page_1;
-use crate::utils::{colors, console};
-use std::{thread, time::Duration};
+use crate::utils::{ colors, console };
+use std::{ thread, time::Duration };
 
-pub fn invalChoice(message: &str) {
+pub fn inval_choice(message: &str) {
     console::clear_console();
     let message: String = if message.is_empty() {
         "Invalid choice, please try again.".to_string()
