@@ -1,5 +1,5 @@
 use crate::pages::page_1;
-use std::{thread, time::Duration};
+use std::{ thread, time::Duration };
 
 pub fn invalChoice() {
     print!("\x1B[2J\x1B[1;1H");
