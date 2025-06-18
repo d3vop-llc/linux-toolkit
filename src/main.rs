@@ -1,4 +1,6 @@
-use std::{io, process::Command, thread, time::Duration};
+use std::{ io };
+
+mod utils;
 
 fn page_1() {
     print!("\x1B[2J\x1B[1;1H");
@@ -11,18 +13,14 @@ fn page_1() {
     match choice {
         1 => {
             let args: Vec<&str> = vec!["sh", "-c", "apt-get update"];
-            print!("\x1B[2J\x1B[1;1H");
-            println!("\x1b[42;1mUpdating system packages...\x1b[0m");
-            let status = Command::new("sudo")
-                .args(&args)
-                .status()
-                .expect("\x1b[41;1mFailed to execute update command\x1b[0m");
-            if status.success() {
-                println!("\x1b[42;1mSystem packages updated successfully.\x1b[0m");
-            } else {
-                println!("\x1b[41;1mFailed to update system packages.\x1b[0m");
-            }
-            thread::sleep(Duration::from_secs(2));
+            utils::run_command(
+                true,
+                "Updating system packages...",
+                "Failed to execute update command",
+                args,
+                "System packages updated successfully.",
+                "Failed to update system packages."
+            );
             page_1();
         }
         0 => {
