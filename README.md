@@ -2,6 +2,8 @@
 
 ## Install
 
+**If `curl` doesn't work, then change `v0.0.1` to current highest (or preferred) version.**
+
 ### Seperate Commands
 
 ```bash

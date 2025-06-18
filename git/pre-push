@@ -3,12 +3,18 @@
 echo "Running pre-push hook..."
 
 # Extract the current version from Cargo.toml
-CURRENT_VERSION=$(grep '^version = ' Cargo.toml | sed -E 's/version = "(.*)"/\1/')
+CURRENT_VERSION=$(grep '^version = ' Cargo.toml | sed -E 's/version = "(.*)"/\1/' | tr -d '\r' | tr -d ' ')
 if [[ -z "$CURRENT_VERSION" ]]; then
   echo "Error: Version not found in Cargo.toml"
   exit 1
 fi
 echo "Current version: $CURRENT_VERSION"
+
+# Validate version format
+if ! [[ "$CURRENT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "Error: Invalid version format in Cargo.toml"
+  exit 1
+fi
 
 # Split the version into major, minor, and patch
 IFS='.' read -r MAJOR MINOR PATCH <<<"$CURRENT_VERSION"
@@ -28,7 +34,14 @@ echo "Cargo.toml updated successfully."
 # Update the version in README.md
 sed -i "s/releases\/download\/v[0-9]\+\.[0-9]\+\.[0-9]\+/releases\/download\/v$NEW_VERSION/" README.md
 if [[ $? -ne 0 ]]; then
-  echo "Failed to update README.md"
+  echo "Failed to update README.md (curl command)"
+  exit 1
+fi
+
+# Update the version in the text
+sed -i "s/\`v[0-9]\+\.[0-9]\+\.[0-9]\`/\`v$NEW_VERSION\`/" README.md
+if [[ $? -ne 0 ]]; then
+  echo "Failed to update README.md (text)"
   exit 1
 fi
 echo "README.md updated successfully."
