@@ -1,6 +1,6 @@
 use crate::pages::page_1;
-use crate::utils::{ colors, console };
-use std::{ thread, time::Duration };
+use crate::utils::{colors, console};
+use std::{thread, time::Duration};
 
 pub fn inval_choice(message: &str) {
     console::clear_console();
