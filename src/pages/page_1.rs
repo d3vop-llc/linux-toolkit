@@ -1,12 +1,63 @@
 use crate::pages::defaults;
-use crate::utils::{colors, commands, console};
+use crate::utils::{ansi, colors, commands, console};
+use crate::variables::colors as color_variable;
 use std::io;
 
 pub fn generate_page() {
     console::clear_console();
-    println!("1. Update System Packages");
-    println!("0. Exit");
-    println!("Please enter your choice:");
+
+    let spacing: &str = "                                         ";
+    // let seperator: String = format!("\x1b[45m                                         \x1b[0m");
+
+    defaults::ui::title_bar();
+
+    println!(
+        "{}",
+        ansi::style(
+            spacing,
+            &format!(
+                "{};{}",
+                color_variable::TEXT_COLOR_PAGE,
+                color_variable::BG_COLOR_PAGE
+            )
+        )
+    );
+    println!(
+        "{}",
+        ansi::style(
+            " 1. Update System Packages               ",
+            &format!(
+                "{};{}",
+                color_variable::TEXT_COLOR_PAGE,
+                color_variable::BG_COLOR_PAGE
+            )
+        )
+    );
+    println!(
+        "{}",
+        ansi::style(
+            " 0. Exit                                 ",
+            &format!(
+                "{};{}",
+                color_variable::TEXT_COLOR_PAGE,
+                color_variable::BG_COLOR_PAGE
+            )
+        )
+    );
+    println!(
+        "{}",
+        ansi::style(
+            spacing,
+            &format!(
+                "{};{}",
+                color_variable::TEXT_COLOR_PAGE,
+                color_variable::BG_COLOR_PAGE
+            )
+        )
+    );
+
+    defaults::ui::please_enter_choice();
+
     let mut input = String::new();
     io::stdin()
         .read_line(&mut input)
