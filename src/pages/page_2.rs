@@ -1,6 +1,6 @@
-use crate::{ pages, pages::defaults };
-use crate::utils::{ ansi, colors, commands, console };
+use crate::utils::{ansi, colors, commands, console};
 use crate::variables::colors as color_variable;
+use crate::{pages, pages::defaults};
 use std::io;
 
 pub fn generate_page() {
@@ -15,28 +15,44 @@ pub fn generate_page() {
         "{}",
         ansi::style(
             spacing,
-            &format!("{};{}", color_variable::TEXT_COLOR_PAGE, color_variable::BG_COLOR_PAGE)
+            &format!(
+                "{};{}",
+                color_variable::TEXT_COLOR_PAGE,
+                color_variable::BG_COLOR_PAGE
+            )
         )
     );
     println!(
         "{}",
         ansi::style(
             " 1. Check for Rootkits                   ",
-            &format!("{};{}", color_variable::TEXT_COLOR_PAGE, color_variable::BG_COLOR_PAGE)
+            &format!(
+                "{};{}",
+                color_variable::TEXT_COLOR_PAGE,
+                color_variable::BG_COLOR_PAGE
+            )
         )
     );
     println!(
         "{}",
         ansi::style(
             " 0. Return                               ",
-            &format!("{};{}", color_variable::TEXT_COLOR_PAGE, color_variable::BG_COLOR_PAGE)
+            &format!(
+                "{};{}",
+                color_variable::TEXT_COLOR_PAGE,
+                color_variable::BG_COLOR_PAGE
+            )
         )
     );
     println!(
         "{}",
         ansi::style(
             spacing,
-            &format!("{};{}", color_variable::TEXT_COLOR_PAGE, color_variable::BG_COLOR_PAGE)
+            &format!(
+                "{};{}",
+                color_variable::TEXT_COLOR_PAGE,
+                color_variable::BG_COLOR_PAGE
+            )
         )
     );
 
@@ -45,7 +61,10 @@ pub fn generate_page() {
     let mut input = String::new();
     io::stdin()
         .read_line(&mut input)
-        .expect(&colors::output_background_color("red", "Failed to read line"));
+        .expect(&colors::output_background_color(
+            "red",
+            "Failed to read line",
+        ));
     let choice: u8 = match input.trim().parse::<u8>() {
         // returns Result<T, std::num::ParseIntError>
         Ok(num) => num,
@@ -59,7 +78,7 @@ pub fn generate_page() {
             let args: Vec<&str> = vec![
                 "sh",
                 "-c",
-                "apt update && apt install chkrootkit rkhunter -y"
+                "apt update && apt install chkrootkit rkhunter -y",
             ];
             commands::run_command(
                 true,
@@ -67,7 +86,7 @@ pub fn generate_page() {
                 "Failed to install chkrootkit and rkhunter.",
                 args,
                 "Successfully installed chkrootkit and rkhunter.",
-                "Failed to install chkrootkit and rkhunter."
+                "Failed to install chkrootkit and rkhunter.",
             );
             let args: Vec<&str> = vec!["sh", "-c", "chkrootkit"];
             commands::run_command(
@@ -76,7 +95,7 @@ pub fn generate_page() {
                 "Failed to check for rootkits.",
                 args,
                 "Successfully scanned for rootkits.",
-                "Failed to scan for rootkits."
+                "Failed to scan for rootkits.",
             );
             let args: Vec<&str> = vec!["sh", "-c", "rkhunter --check"];
             commands::run_command(
@@ -85,7 +104,7 @@ pub fn generate_page() {
                 "Failed to check for rootkits.",
                 args,
                 "Successfully scanned for rootkits.",
-                "Failed to scan for rootkits."
+                "Failed to scan for rootkits.",
             );
             generate_page();
         }
