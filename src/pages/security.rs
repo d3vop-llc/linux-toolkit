@@ -9,7 +9,7 @@ pub fn generate_page() {
     let spacing: &str = "                                         ";
     // let seperator: String = format!("\x1b[45m                                         \x1b[0m");
 
-    defaults::ui::title_bar(Some("Linux Toolkit"));
+    defaults::ui::title_bar(Some("     Security"));
 
     println!(
         "{}",
@@ -21,21 +21,14 @@ pub fn generate_page() {
     println!(
         "{}",
         ansi::style(
-            " 1. Update System Packages               ",
+            " 1. Check for Rootkits                   ",
             &format!("{};{}", color_variable::TEXT_COLOR_PAGE, color_variable::BG_COLOR_PAGE)
         )
     );
     println!(
         "{}",
         ansi::style(
-            " 2. Antivirus                            ",
-            &format!("{};{}", color_variable::TEXT_COLOR_PAGE, color_variable::BG_COLOR_PAGE)
-        )
-    );
-    println!(
-        "{}",
-        ansi::style(
-            " 0. Exit                                 ",
+            " 0. Return                               ",
             &format!("{};{}", color_variable::TEXT_COLOR_PAGE, color_variable::BG_COLOR_PAGE)
         )
     );
@@ -63,27 +56,43 @@ pub fn generate_page() {
     };
     match choice {
         1 => {
-            let args: Vec<&str> = vec!["sh", "-c", "apt-get update"];
+            let args: Vec<&str> = vec![
+                "sh",
+                "-c",
+                "apt update && apt install chkrootkit rkhunter -y"
+            ];
             commands::run_command(
                 true,
-                "Updating system packages...",
-                "Failed to execute update command",
+                "Installing chkrootkit and rkhunter...",
+                "Failed to install chkrootkit and rkhunter.",
                 args,
-                "System packages updated successfully.",
-                "Failed to update system packages."
+                "Successfully installed chkrootkit and rkhunter.",
+                "Failed to install chkrootkit and rkhunter."
+            );
+            let args: Vec<&str> = vec!["sh", "-c", "chkrootkit"];
+            commands::run_command(
+                true,
+                "CHKRootKit - Checking for rootkits...",
+                "Failed to check for rootkits.",
+                args,
+                "Successfully scanned for rootkits.",
+                "Failed to scan for rootkits."
+            );
+            let args: Vec<&str> = vec!["sh", "-c", "rkhunter --check"];
+            commands::run_command(
+                true,
+                "RKHunter - Checking for rootkits...",
+                "Failed to check for rootkits.",
+                args,
+                "Successfully scanned for rootkits.",
+                "Failed to scan for rootkits."
             );
             generate_page();
         }
-        2 => {
-            pages::page_2::generate_page();
-        }
-        3 => {
-            pages::security::generate_page();
-        }
         0 => {
             print!("\x1B[2J\x1B[1;1H");
-            println!("Exiting...");
-            std::process::exit(0);
+            println!("Returning...");
+            pages::page_1::generate_page();
         }
         _ => {
             defaults::outputs::inval_choice("");
