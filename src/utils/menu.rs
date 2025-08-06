@@ -1,4 +1,4 @@
-use crate::utils::{ ansi, console };
+use crate::utils::{ansi, console};
 use crate::variables::colors as color_variable;
 use std::io;
 
@@ -65,17 +65,14 @@ impl Menu {
         args: Vec<&str>,
         start_message: &str,
         success_message: &str,
-        error_message: &str
+        error_message: &str,
     ) -> &mut Self {
         self.options.push(MenuOption {
             number: number.to_string(),
             text: text.to_string(),
             action: MenuAction::Command {
                 sudo,
-                args: args
-                    .iter()
-                    .map(|s| s.to_string())
-                    .collect(),
+                args: args.iter().map(|s| s.to_string()).collect(),
                 start_message: start_message.to_string(),
                 success_message: success_message.to_string(),
                 error_message: error_message.to_string(),
@@ -134,7 +131,9 @@ impl Menu {
 
         // Handle input
         let mut input = String::new();
-        io::stdin().read_line(&mut input).expect("Failed to read line");
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
 
         let choice = input.trim();
         self.handle_choice(choice);
@@ -144,24 +143,44 @@ impl Menu {
     fn display_title(&self) {
         let txt_d = ansi::style(
             "D",
-            &format!("{};1;{}", color_variable::TEXT_COLOR_GREY, color_variable::BG_COLOR_GREEN)
+            &format!(
+                "{};1;{}",
+                color_variable::TEXT_COLOR_GREY,
+                color_variable::BG_COLOR_GREEN
+            ),
         );
         let txt_3 = ansi::style(
             "3",
-            &format!("{};1;{}", color_variable::TEXT_COLOR_GREY, color_variable::BG_COLOR_GREEN)
+            &format!(
+                "{};1;{}",
+                color_variable::TEXT_COLOR_GREY,
+                color_variable::BG_COLOR_GREEN
+            ),
         );
         let txt_vop = ansi::style(
             "vop",
-            &format!("{};1;{}", color_variable::TEXT_COLOR_GREY, color_variable::BG_COLOR_GREEN)
+            &format!(
+                "{};1;{}",
+                color_variable::TEXT_COLOR_GREY,
+                color_variable::BG_COLOR_GREEN
+            ),
         );
 
         let title_text_title = ansi::style(
             &self.title,
-            &format!("{};1;{}", color_variable::TEXT_COLOR_BLACK, color_variable::BG_COLOR_GREEN)
+            &format!(
+                "{};1;{}",
+                color_variable::TEXT_COLOR_BLACK,
+                color_variable::BG_COLOR_GREEN
+            ),
         );
         let title_text_title_separator = ansi::style(
             " - ",
-            &format!("{};1;{}", color_variable::TEXT_COLOR_BLACK, color_variable::BG_COLOR_GREEN)
+            &format!(
+                "{};1;{}",
+                color_variable::TEXT_COLOR_BLACK,
+                color_variable::BG_COLOR_GREEN
+            ),
         );
 
         let title_text_output = format!(
@@ -191,7 +210,7 @@ impl Menu {
     fn print_prompt(&self) {
         let prompt = ansi::style(
             "Enter your choice: ",
-            &format!("{};1", color_variable::MENU_PROMPT_COLOR)
+            &format!("{};1", color_variable::MENU_PROMPT_COLOR),
         );
         print!("{}", prompt);
     }
@@ -218,7 +237,7 @@ impl Menu {
                             args,
                             start_message,
                             success_message,
-                            error_message
+                            error_message,
                         );
                         return;
                     }
@@ -252,18 +271,15 @@ impl Menu {
         args: &[String],
         start_message: &str,
         success_message: &str,
-        error_message: &str
+        error_message: &str,
     ) {
         crate::utils::commands::run_command(
             sudo,
             start_message,
             error_message,
-            args
-                .iter()
-                .map(|s| s.as_str())
-                .collect(),
+            args.iter().map(|s| s.as_str()).collect(),
             success_message,
-            error_message
+            error_message,
         );
         // Return to this menu after command execution
         self.display_and_handle();
@@ -272,7 +288,10 @@ impl Menu {
     /// Show invalid choice message and redisplay menu
     fn show_invalid_choice(&self) {
         console::clear_console();
-        let message = ansi::style("Invalid choice, please try again.", color_variable::ERROR_COLOR);
+        let message = ansi::style(
+            "Invalid choice, please try again.",
+            color_variable::ERROR_COLOR,
+        );
         println!("{}", message);
         std::thread::sleep(std::time::Duration::from_secs(1));
         self.display_and_handle();

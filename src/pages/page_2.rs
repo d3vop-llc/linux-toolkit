@@ -1,5 +1,5 @@
-use crate::utils::page_builder::PageBuilder;
 use crate::pages;
+use crate::utils::page_builder::PageBuilder;
 
 pub fn generate_page() {
     PageBuilder::new("Antivirus")
@@ -8,13 +8,13 @@ pub fn generate_page() {
             "2",
             "Run CHKRootKit Scan",
             "chkrootkit",
-            "Scanning for rootkits with CHKRootKit"
+            "Scanning for rootkits with CHKRootKit",
         )
         .add_system_command(
             "3",
             "Run RKHunter Scan",
             "rkhunter --check --skip-keypress",
-            "Scanning for rootkits with RKHunter"
+            "Scanning for rootkits with RKHunter",
         )
         .add_separator()
         .add_back("0", pages::page_1::generate_page)

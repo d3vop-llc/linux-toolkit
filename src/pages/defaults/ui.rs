@@ -5,24 +5,44 @@ use crate::variables::colors as color_variable;
 pub fn title_bar(title_text: Option<&str>) {
     let txt_d = ansi::style(
         "D",
-        &format!("{};1;{}", color_variable::TEXT_COLOR_GREY, color_variable::BG_COLOR_GREEN)
+        &format!(
+            "{};1;{}",
+            color_variable::TEXT_COLOR_GREY,
+            color_variable::BG_COLOR_GREEN
+        ),
     );
     let txt_3 = ansi::style(
         "3",
-        &format!("{};1;{}", color_variable::TEXT_COLOR_GREY, color_variable::BG_COLOR_GREEN)
+        &format!(
+            "{};1;{}",
+            color_variable::TEXT_COLOR_GREY,
+            color_variable::BG_COLOR_GREEN
+        ),
     );
     let txt_vop = ansi::style(
         "vop",
-        &format!("{};1;{}", color_variable::TEXT_COLOR_GREY, color_variable::BG_COLOR_GREEN)
+        &format!(
+            "{};1;{}",
+            color_variable::TEXT_COLOR_GREY,
+            color_variable::BG_COLOR_GREEN
+        ),
     );
 
     let title_text_title = ansi::style(
         title_text.unwrap_or("Linux Toolkit"),
-        &format!("{};1;{}", color_variable::TEXT_COLOR_BLACK, color_variable::BG_COLOR_GREEN)
+        &format!(
+            "{};1;{}",
+            color_variable::TEXT_COLOR_BLACK,
+            color_variable::BG_COLOR_GREEN
+        ),
     );
     let title_text_title_seperator = ansi::style(
         " - ",
-        &format!("{};1;{}", color_variable::TEXT_COLOR_BLACK, color_variable::BG_COLOR_GREEN)
+        &format!(
+            "{};1;{}",
+            color_variable::TEXT_COLOR_BLACK,
+            color_variable::BG_COLOR_GREEN
+        ),
     );
 
     let title_text_output = format!(
@@ -67,7 +87,7 @@ pub fn print_menu(title: &str, options: &[(String, String)]) {
 pub fn please_enter_choice() {
     let prompt = ansi::style(
         "Enter your choice: ",
-        &format!("{};1", color_variable::MENU_PROMPT_COLOR)
+        &format!("{};1", color_variable::MENU_PROMPT_COLOR),
     );
     print!("{}", prompt);
 }

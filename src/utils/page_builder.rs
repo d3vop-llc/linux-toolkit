@@ -1,4 +1,4 @@
-use crate::utils::menu::{ Menu, MenuAction };
+use crate::utils::menu::{Menu, MenuAction};
 
 /// A builder for easily creating standardized pages
 pub struct PageBuilder {
@@ -27,20 +27,17 @@ impl PageBuilder {
         number: &str,
         text: &str,
         command: &str,
-        description: &str
+        description: &str,
     ) -> Self {
         let args = vec!["sh".to_string(), "-c".to_string(), command.to_string()];
         self.menu.add_command(
             number,
             text,
             true, // Most system commands need sudo
-            args
-                .iter()
-                .map(|s| s.as_str())
-                .collect(),
+            args.iter().map(|s| s.as_str()).collect(),
             &format!("{}...", description),
             &format!("{} completed successfully.", description),
-            &format!("Failed to {}.", description.to_lowercase())
+            &format!("Failed to {}.", description.to_lowercase()),
         );
         self
     }
@@ -49,7 +46,12 @@ impl PageBuilder {
     pub fn add_apt_install(mut self, number: &str, text: &str, packages: &[&str]) -> Self {
         let package_list = packages.join(" ");
         let command = format!("apt update && apt install {} -y", package_list);
-        self.add_system_command(number, text, &command, &format!("Installing {}", package_list))
+        self.add_system_command(
+            number,
+            text,
+            &command,
+            &format!("Installing {}", package_list),
+        )
     }
 
     /// Add a custom command with full control
@@ -61,7 +63,7 @@ impl PageBuilder {
         args: Vec<&str>,
         start_message: &str,
         success_message: &str,
-        error_message: &str
+        error_message: &str,
     ) -> Self {
         self.menu.add_command(
             number,
@@ -70,7 +72,7 @@ impl PageBuilder {
             args,
             start_message,
             success_message,
-            error_message
+            error_message,
         );
         self
     }
@@ -83,7 +85,8 @@ impl PageBuilder {
 
     /// Add a back/return option
     pub fn add_back(mut self, number: &str, back_function: fn()) -> Self {
-        self.menu.add_back(number, "Return to Main Menu", back_function);
+        self.menu
+            .add_back(number, "Return to Main Menu", back_function);
         self
     }
 
@@ -122,7 +125,7 @@ macro_rules! create_page {
 pub fn page_option(
     number: &str,
     text: &str,
-    page_func: fn()
+    page_func: fn(),
 ) -> impl Fn(PageBuilder) -> PageBuilder {
     let number = number.to_string();
     let text = text.to_string();
@@ -133,7 +136,7 @@ pub fn system_command(
     number: &str,
     text: &str,
     command: &str,
-    description: &str
+    description: &str,
 ) -> impl Fn(PageBuilder) -> PageBuilder {
     let number = number.to_string();
     let text = text.to_string();
@@ -145,19 +148,13 @@ pub fn system_command(
 pub fn apt_install(
     number: &str,
     text: &str,
-    packages: &[&str]
+    packages: &[&str],
 ) -> impl Fn(PageBuilder) -> PageBuilder {
     let number = number.to_string();
     let text = text.to_string();
-    let packages: Vec<String> = packages
-        .iter()
-        .map(|s| s.to_string())
-        .collect();
+    let packages: Vec<String> = packages.iter().map(|s| s.to_string()).collect();
     move |builder: PageBuilder| {
-        let package_refs: Vec<&str> = packages
-            .iter()
-            .map(|s| s.as_str())
-            .collect();
+        let package_refs: Vec<&str> = packages.iter().map(|s| s.as_str()).collect();
         builder.add_apt_install(&number, &text, &package_refs)
     }
 }

@@ -1,5 +1,5 @@
-use crate::utils::page_builder::PageBuilder;
 use crate::pages;
+use crate::utils::page_builder::PageBuilder;
 
 pub fn generate_page() {
     PageBuilder::new("Linux Toolkit")
@@ -7,7 +7,7 @@ pub fn generate_page() {
             "1",
             "Update System Packages",
             "apt-get update",
-            "Updating system packages"
+            "Updating system packages",
         )
         .add_page("2", "Antivirus", pages::page_2::generate_page)
         .add_page("3", "Security", pages::security::generate_page)
