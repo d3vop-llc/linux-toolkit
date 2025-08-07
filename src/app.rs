@@ -1,17 +1,18 @@
 use anyhow::Result;
-use crossterm::event::{self, Event, KeyCode, KeyEventKind};
+use crossterm::event::{ self, Event, KeyCode, KeyEventKind };
 use ratatui::{
     backend::CrosstermBackend,
-    layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
-    text::{Line, Span},
-    widgets::{Block, Borders, Clear, List, ListItem, ListState, Paragraph, Wrap},
-    Frame, Terminal,
+    layout::{ Constraint, Direction, Layout, Rect },
+    style::{ Color, Modifier, Style },
+    text::{ Line, Span },
+    widgets::{ Block, Borders, Clear, List, ListItem, ListState, Paragraph, Wrap },
+    Frame,
+    Terminal,
 };
 use std::io;
 use tokio::time::Duration;
 
-use crate::commands::{Command, CommandCategory};
+use crate::commands::{ Command, CommandCategory };
 use crate::config::Config;
 
 pub struct App {
@@ -29,6 +30,8 @@ pub struct App {
     pub command_output: Vec<String>,
     pub input_mode: bool,
     pub input_buffer: String,
+    pub execute_in_terminal: bool,
+    pub pending_command: Option<Command>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -67,14 +70,44 @@ impl App {
             command_output: Vec::new(),
             input_mode: false,
             input_buffer: String::new(),
+            execute_in_terminal: false,
+            pending_command: None,
         }
     }
 
     pub async fn run(
         &mut self,
-        terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
+        terminal: &mut Terminal<CrosstermBackend<io::Stdout>>
     ) -> Result<()> {
         loop {
+            // Check if we need to execute a command in terminal
+            if self.execute_in_terminal {
+                if let Some(command) = &self.pending_command {
+                    // Restore terminal to normal mode
+                    crate::ui::restore_terminal(terminal)?;
+
+                    // Execute command in terminal
+                    let result = crate::commands::execute_command_in_terminal(
+                        command,
+                        &self.config
+                    ).await;
+
+                    // Re-setup terminal for TUI
+                    *terminal = crate::ui::setup_terminal()?;
+
+                    // Handle any errors
+                    if let Err(e) = result {
+                        self.command_output.clear();
+                        self.command_output.push(format!("❌ Execution failed: {}", e));
+                        self.show_command_details = true;
+                    }
+
+                    // Reset flags
+                    self.execute_in_terminal = false;
+                    self.pending_command = None;
+                }
+            }
+
             terminal.draw(|f| self.ui(f))?;
 
             if event::poll(Duration::from_millis(100))? {
@@ -213,21 +246,13 @@ impl App {
     async fn execute_selected_command(&mut self) -> Result<()> {
         if let Some(category) = self.categories.get(self.current_category) {
             if let Some(command) = category.commands.get(self.current_command) {
-                self.executing_command = true;
+                // Set the command to execute in terminal
+                self.pending_command = Some(command.clone());
+                self.execute_in_terminal = true;
+
+                // Clear any previous output
                 self.command_output.clear();
-
-                // Execute the command
-                match crate::commands::execute_command(command, &self.config).await {
-                    Ok(output) => {
-                        self.command_output = output.lines().map(|s| s.to_string()).collect();
-                    }
-                    Err(e) => {
-                        self.command_output.push(format!("Error: {}", e));
-                    }
-                }
-
-                self.executing_command = false;
-                self.show_command_details = true;
+                self.show_command_details = false;
             }
         }
         Ok(())
@@ -253,14 +278,12 @@ impl App {
     }
 
     fn render_categories(&mut self, f: &mut Frame, area: Rect) {
-        let items: Vec<ListItem> = self
-            .categories
+        let items: Vec<ListItem> = self.categories
             .iter()
             .map(|category| {
-                ListItem::new(Line::from(Span::styled(
-                    &category.name,
-                    Style::default().fg(Color::White),
-                )))
+                ListItem::new(
+                    Line::from(Span::styled(&category.name, Style::default().fg(Color::White)))
+                )
             })
             .collect();
 
@@ -275,37 +298,44 @@ impl App {
                 Block::default()
                     .borders(Borders::ALL)
                     .title("Categories")
-                    .border_style(border_style),
+                    .border_style(border_style)
             )
             .highlight_style(
-                Style::default()
-                    .fg(Color::Black)
-                    .bg(Color::Green)
-                    .add_modifier(Modifier::BOLD),
+                Style::default().fg(Color::Black).bg(Color::Green).add_modifier(Modifier::BOLD)
             );
 
         f.render_stateful_widget(list, area, &mut self.category_list_state);
     }
 
     fn render_commands(&mut self, f: &mut Frame, area: Rect) {
-        let items: Vec<ListItem> =
-            if let Some(category) = self.categories.get(self.current_category) {
-                category
-                    .commands
-                    .iter()
-                    .map(|command| {
-                        ListItem::new(Line::from(vec![
-                            Span::styled(&command.name, Style::default().fg(Color::White)),
-                            Span::styled(
-                                format!(" - {}", command.description),
-                                Style::default().fg(Color::Gray),
-                            ),
-                        ]))
-                    })
-                    .collect()
-            } else {
-                vec![]
-            };
+        let items: Vec<ListItem> = if
+            let Some(category) = self.categories.get(self.current_category)
+        {
+            category.commands
+                .iter()
+                .map(|command| {
+                    let mut spans = vec![
+                        Span::styled(&command.name, Style::default().fg(Color::White))
+                    ];
+
+                    // Add sudo indicator if command requires elevation
+                    if command.requires_sudo {
+                        spans.push(Span::styled(" 🔐", Style::default().fg(Color::Yellow)));
+                    }
+
+                    spans.push(
+                        Span::styled(
+                            format!(" - {}", command.description),
+                            Style::default().fg(Color::Gray)
+                        )
+                    );
+
+                    ListItem::new(Line::from(spans))
+                })
+                .collect()
+        } else {
+            vec![]
+        };
 
         let border_style = if self.focused_panel == FocusedPanel::Commands {
             Style::default().fg(Color::Green)
@@ -315,16 +345,10 @@ impl App {
 
         let list = List::new(items)
             .block(
-                Block::default()
-                    .borders(Borders::ALL)
-                    .title("Commands")
-                    .border_style(border_style),
+                Block::default().borders(Borders::ALL).title("Commands").border_style(border_style)
             )
             .highlight_style(
-                Style::default()
-                    .fg(Color::Black)
-                    .bg(Color::Green)
-                    .add_modifier(Modifier::BOLD),
+                Style::default().fg(Color::Black).bg(Color::Green).add_modifier(Modifier::BOLD)
             );
 
         f.render_stateful_widget(list, area, &mut self.command_list_state);
@@ -343,7 +367,7 @@ impl App {
                     Block::default()
                         .borders(Borders::ALL)
                         .title("Status")
-                        .border_style(border_style),
+                        .border_style(border_style)
                 )
                 .style(Style::default().fg(Color::Yellow));
             f.render_widget(paragraph, area);
@@ -357,7 +381,7 @@ impl App {
                     Block::default()
                         .borders(Borders::ALL)
                         .title("Output")
-                        .border_style(border_style),
+                        .border_style(border_style)
                 )
                 .wrap(Wrap { trim: true })
                 .style(Style::default().fg(Color::White));
@@ -368,47 +392,98 @@ impl App {
         if let Some(category) = self.categories.get(self.current_category) {
             if let Some(command) = category.commands.get(self.current_command) {
                 let mut text = vec![
-                    Line::from(vec![
-                        Span::styled("Name: ", Style::default().fg(Color::Green)),
-                        Span::styled(&command.name, Style::default().fg(Color::White)),
-                    ]),
+                    Line::from(
+                        vec![
+                            Span::styled("Name: ", Style::default().fg(Color::Green)),
+                            Span::styled(&command.name, Style::default().fg(Color::White))
+                        ]
+                    ),
                     Line::from(""),
-                    Line::from(vec![
-                        Span::styled("Description: ", Style::default().fg(Color::Green)),
-                        Span::styled(&command.description, Style::default().fg(Color::White)),
-                    ]),
-                    Line::from(""),
+                    Line::from(
+                        vec![
+                            Span::styled("Description: ", Style::default().fg(Color::Green)),
+                            Span::styled(&command.description, Style::default().fg(Color::White))
+                        ]
+                    ),
+                    Line::from("")
                 ];
 
                 if !command.usage.is_empty() {
-                    text.push(Line::from(vec![
-                        Span::styled("Usage: ", Style::default().fg(Color::Green)),
-                        Span::styled(&command.usage, Style::default().fg(Color::Cyan)),
-                    ]));
+                    text.push(
+                        Line::from(
+                            vec![
+                                Span::styled("Usage: ", Style::default().fg(Color::Green)),
+                                Span::styled(&command.usage, Style::default().fg(Color::Cyan))
+                            ]
+                        )
+                    );
                     text.push(Line::from(""));
                 }
 
+                // Show permission requirements
+                text.push(
+                    Line::from(
+                        vec![Span::styled("Permissions: ", Style::default().fg(Color::Green)), if
+                            command.requires_sudo
+                        {
+                            Span::styled(
+                                "🔐 Requires elevated privileges",
+                                Style::default().fg(Color::Yellow)
+                            )
+                        } else {
+                            Span::styled("✓ Standard user", Style::default().fg(Color::Green))
+                        }]
+                    )
+                );
+                text.push(Line::from(""));
+
                 if !command.tags.is_empty() {
-                    text.push(Line::from(vec![
-                        Span::styled("Tags: ", Style::default().fg(Color::Green)),
-                        Span::styled(command.tags.join(", "), Style::default().fg(Color::Yellow)),
-                    ]));
+                    text.push(
+                        Line::from(
+                            vec![
+                                Span::styled("Tags: ", Style::default().fg(Color::Green)),
+                                Span::styled(
+                                    command.tags.join(", "),
+                                    Style::default().fg(Color::Yellow)
+                                )
+                            ]
+                        )
+                    );
                     text.push(Line::from(""));
                 }
 
                 text.push(Line::from(""));
-                text.push(Line::from(vec![
-                    Span::styled("Press ", Style::default().fg(Color::Gray)),
-                    Span::styled("Enter", Style::default().fg(Color::Green)),
-                    Span::styled(" to execute", Style::default().fg(Color::Gray)),
-                ]));
+                text.push(
+                    Line::from(
+                        vec![
+                            Span::styled("Press ", Style::default().fg(Color::Gray)),
+                            Span::styled("Enter", Style::default().fg(Color::Green)),
+                            Span::styled(" to execute", Style::default().fg(Color::Gray))
+                        ]
+                    )
+                );
+
+                // Add permission hint
+                if command.requires_sudo && !crate::utils::is_root() {
+                    text.push(
+                        Line::from(
+                            vec![
+                                Span::styled("Note: ", Style::default().fg(Color::Yellow)),
+                                Span::styled(
+                                    "Will prompt for sudo if needed",
+                                    Style::default().fg(Color::Gray)
+                                )
+                            ]
+                        )
+                    );
+                }
 
                 let paragraph = Paragraph::new(text)
                     .block(
                         Block::default()
                             .borders(Borders::ALL)
                             .title("Details")
-                            .border_style(border_style),
+                            .border_style(border_style)
                     )
                     .wrap(Wrap { trim: true });
                 f.render_widget(paragraph, area);
@@ -422,40 +497,38 @@ impl App {
         f.render_widget(Clear, popup_area);
 
         let help_text = vec![
-            Line::from(vec![Span::styled(
-                "Linux Toolkit - Help",
-                Style::default()
-                    .fg(Color::Green)
-                    .add_modifier(Modifier::BOLD),
-            )]),
+            Line::from(
+                vec![
+                    Span::styled(
+                        "Linux Toolkit - Help",
+                        Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)
+                    )
+                ]
+            ),
             Line::from(""),
-            Line::from(vec![Span::styled(
-                "Navigation:",
-                Style::default().fg(Color::Yellow),
-            )]),
+            Line::from(vec![Span::styled("Navigation:", Style::default().fg(Color::Yellow))]),
             Line::from("  ↑/↓        - Navigate lists"),
             Line::from("  ←/→        - Switch between panels"),
             Line::from("  Tab        - Cycle through panels"),
             Line::from("  Enter      - Execute selected command"),
             Line::from("  Space      - Toggle command details"),
             Line::from(""),
-            Line::from(vec![Span::styled(
-                "General:",
-                Style::default().fg(Color::Yellow),
-            )]),
+            Line::from(vec![Span::styled("General:", Style::default().fg(Color::Yellow))]),
             Line::from("  h/F1       - Toggle this help"),
             Line::from("  q/Esc      - Quit application"),
             Line::from(""),
-            Line::from(vec![Span::styled(
-                "Tips:",
-                Style::default().fg(Color::Yellow),
-            )]),
+            Line::from(vec![Span::styled("Permissions:", Style::default().fg(Color::Yellow))]),
+            Line::from("  🔐         - Commands requiring sudo"),
+            Line::from("  • Automatic elevation for permission errors"),
+            Line::from("  • Commands retry with sudo when needed"),
+            Line::from(""),
+            Line::from(vec![Span::styled("Tips:", Style::default().fg(Color::Yellow))]),
             Line::from("  • Commands are organized by category"),
             Line::from("  • Green highlights indicate focus"),
             Line::from("  • Output appears in the details panel"),
-            Line::from("  • Some commands may require sudo"),
+            Line::from("  • Permission denied? Tool will auto-elevate"),
             Line::from(""),
-            Line::from("Press h or F1 to close this help"),
+            Line::from("Press h or F1 to close this help")
         ];
 
         let paragraph = Paragraph::new(help_text)
@@ -463,7 +536,7 @@ impl App {
                 Block::default()
                     .borders(Borders::ALL)
                     .title("Help")
-                    .border_style(Style::default().fg(Color::Green)),
+                    .border_style(Style::default().fg(Color::Green))
             )
             .wrap(Wrap { trim: true });
 
