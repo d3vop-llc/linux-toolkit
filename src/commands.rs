@@ -421,6 +421,13 @@ pub fn load_categories() -> Vec<CommandCategory> {
 pub async fn execute_command_in_terminal(command: &Command, config: &Config) -> Result<()> {
     use std::process::Command as StdCommand;
 
+    // Clear the terminal screen before executing the command
+    if cfg!(target_os = "windows") {
+        let _ = StdCommand::new("cls").status();
+    } else {
+        let _ = StdCommand::new("clear").status();
+    }
+
     // Build the command with proper shell handling
     let has_shell_operators = command.args.iter().any(|arg| {
         arg.contains("&&") || arg.contains("|") || arg.contains(">") || arg.contains("<")
@@ -506,6 +513,13 @@ pub async fn execute_command_in_terminal(command: &Command, config: &Config) -> 
 
 async fn execute_command_with_sudo_retry(command: &Command) -> Result<()> {
     use std::process::Command as StdCommand;
+
+    // Clear the terminal screen before retrying with sudo
+    if cfg!(target_os = "windows") {
+        let _ = StdCommand::new("cls").status();
+    } else {
+        let _ = StdCommand::new("clear").status();
+    }
 
     let has_shell_operators = command.args.iter().any(|arg| {
         arg.contains("&&") || arg.contains("|") || arg.contains(">") || arg.contains("<")
