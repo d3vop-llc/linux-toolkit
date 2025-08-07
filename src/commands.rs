@@ -1,5 +1,5 @@
 use anyhow::Result;
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 use std::process::Stdio;
 use tokio::process::Command as TokioCommand;
 
@@ -40,7 +40,7 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     tags: vec![
                         "network".to_string(),
                         "scan".to_string(),
-                        "reconnaissance".to_string()
+                        "reconnaissance".to_string(),
                     ],
                     requires_sudo: false,
                     category: "network".to_string(),
@@ -49,9 +49,17 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     name: "Port Scan".to_string(),
                     description: "Scan for open ports on a target".to_string(),
                     command: "nmap".to_string(),
-                    args: vec!["-sS".to_string(), "-O".to_string(), "192.168.1.1".to_string()],
+                    args: vec![
+                        "-sS".to_string(),
+                        "-O".to_string(),
+                        "192.168.1.1".to_string(),
+                    ],
                     usage: "nmap -sS -O <target>".to_string(),
-                    tags: vec!["network".to_string(), "ports".to_string(), "scan".to_string()],
+                    tags: vec![
+                        "network".to_string(),
+                        "ports".to_string(),
+                        "scan".to_string(),
+                    ],
                     requires_sudo: true,
                     category: "network".to_string(),
                 },
@@ -64,7 +72,7 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     tags: vec![
                         "network".to_string(),
                         "connections".to_string(),
-                        "monitoring".to_string()
+                        "monitoring".to_string(),
                     ],
                     requires_sudo: false,
                     category: "network".to_string(),
@@ -75,13 +83,16 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     command: "iwlist".to_string(),
                     args: vec!["scan".to_string()],
                     usage: "iwlist scan".to_string(),
-                    tags: vec!["wifi".to_string(), "wireless".to_string(), "scan".to_string()],
+                    tags: vec![
+                        "wifi".to_string(),
+                        "wireless".to_string(),
+                        "scan".to_string(),
+                    ],
                     requires_sudo: true,
                     category: "network".to_string(),
-                }
+                },
             ],
         },
-
         // System Information & Monitoring
         CommandCategory {
             name: "System Info".to_string(),
@@ -93,7 +104,11 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     command: "neofetch".to_string(),
                     args: vec![],
                     usage: "neofetch".to_string(),
-                    tags: vec!["system".to_string(), "info".to_string(), "overview".to_string()],
+                    tags: vec![
+                        "system".to_string(),
+                        "info".to_string(),
+                        "overview".to_string(),
+                    ],
                     requires_sudo: false,
                     category: "system".to_string(),
                 },
@@ -123,7 +138,11 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     command: "df".to_string(),
                     args: vec!["-h".to_string()],
                     usage: "df -h".to_string(),
-                    tags: vec!["disk".to_string(), "storage".to_string(), "usage".to_string()],
+                    tags: vec![
+                        "disk".to_string(),
+                        "storage".to_string(),
+                        "usage".to_string(),
+                    ],
                     requires_sudo: false,
                     category: "system".to_string(),
                 },
@@ -133,13 +152,16 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     command: "lscpu".to_string(),
                     args: vec![],
                     usage: "lscpu".to_string(),
-                    tags: vec!["cpu".to_string(), "hardware".to_string(), "info".to_string()],
+                    tags: vec![
+                        "cpu".to_string(),
+                        "hardware".to_string(),
+                        "info".to_string(),
+                    ],
                     requires_sudo: false,
                     category: "system".to_string(),
-                }
+                },
             ],
         },
-
         // Security & Forensics
         CommandCategory {
             name: "Security".to_string(),
@@ -154,7 +176,7 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     tags: vec![
                         "security".to_string(),
                         "logs".to_string(),
-                        "authentication".to_string()
+                        "authentication".to_string(),
                     ],
                     requires_sudo: true,
                     category: "security".to_string(),
@@ -165,13 +187,18 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     command: "cat".to_string(),
                     args: vec!["/etc/passwd".to_string()],
                     usage: "cat /etc/passwd".to_string(),
-                    tags: vec!["users".to_string(), "accounts".to_string(), "system".to_string()],
+                    tags: vec![
+                        "users".to_string(),
+                        "accounts".to_string(),
+                        "system".to_string(),
+                    ],
                     requires_sudo: false,
                     category: "security".to_string(),
                 },
                 Command {
                     name: "Check SUID Files".to_string(),
-                    description: "Find SUID/SGID files (potential privilege escalation)".to_string(),
+                    description: "Find SUID/SGID files (potential privilege escalation)"
+                        .to_string(),
                     command: "find".to_string(),
                     args: vec![
                         "/".to_string(),
@@ -180,13 +207,13 @@ pub fn load_categories() -> Vec<CommandCategory> {
                         "-o".to_string(),
                         "-perm".to_string(),
                         "-2000".to_string(),
-                        "2>/dev/null".to_string()
+                        "2>/dev/null".to_string(),
                     ],
                     usage: "find / -perm -4000 -o -perm -2000 2>/dev/null".to_string(),
                     tags: vec![
                         "suid".to_string(),
                         "privilege".to_string(),
-                        "escalation".to_string()
+                        "escalation".to_string(),
                     ],
                     requires_sudo: true,
                     category: "security".to_string(),
@@ -200,14 +227,13 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     tags: vec![
                         "files".to_string(),
                         "network".to_string(),
-                        "monitoring".to_string()
+                        "monitoring".to_string(),
                     ],
                     requires_sudo: true,
                     category: "security".to_string(),
-                }
+                },
             ],
         },
-
         // Log Analysis
         CommandCategory {
             name: "Log Analysis".to_string(),
@@ -219,7 +245,11 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     command: "journalctl".to_string(),
                     args: vec!["-n".to_string(), "50".to_string()],
                     usage: "journalctl -n 50".to_string(),
-                    tags: vec!["logs".to_string(), "system".to_string(), "journal".to_string()],
+                    tags: vec![
+                        "logs".to_string(),
+                        "system".to_string(),
+                        "journal".to_string(),
+                    ],
                     requires_sudo: false,
                     category: "logs".to_string(),
                 },
@@ -230,10 +260,14 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     args: vec![
                         "-n".to_string(),
                         "100".to_string(),
-                        "/var/log/apache2/access.log".to_string()
+                        "/var/log/apache2/access.log".to_string(),
                     ],
                     usage: "tail -n 100 /var/log/apache2/access.log".to_string(),
-                    tags: vec!["apache".to_string(), "web".to_string(), "access".to_string()],
+                    tags: vec![
+                        "apache".to_string(),
+                        "web".to_string(),
+                        "access".to_string(),
+                    ],
                     requires_sudo: true,
                     category: "logs".to_string(),
                 },
@@ -243,13 +277,16 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     command: "grep".to_string(),
                     args: vec!["sshd".to_string(), "/var/log/auth.log".to_string()],
                     usage: "grep sshd /var/log/auth.log".to_string(),
-                    tags: vec!["ssh".to_string(), "authentication".to_string(), "logs".to_string()],
+                    tags: vec![
+                        "ssh".to_string(),
+                        "authentication".to_string(),
+                        "logs".to_string(),
+                    ],
                     requires_sudo: true,
                     category: "logs".to_string(),
-                }
+                },
             ],
         },
-
         // File Operations
         CommandCategory {
             name: "File Operations".to_string(),
@@ -263,10 +300,14 @@ pub fn load_categories() -> Vec<CommandCategory> {
                         "/".to_string(),
                         "-size".to_string(),
                         "+100M".to_string(),
-                        "2>/dev/null".to_string()
+                        "2>/dev/null".to_string(),
                     ],
                     usage: "find / -size +100M 2>/dev/null".to_string(),
-                    tags: vec!["files".to_string(), "size".to_string(), "cleanup".to_string()],
+                    tags: vec![
+                        "files".to_string(),
+                        "size".to_string(),
+                        "cleanup".to_string(),
+                    ],
                     requires_sudo: true,
                     category: "files".to_string(),
                 },
@@ -276,7 +317,11 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     command: "du".to_string(),
                     args: vec!["-sh".to_string(), "*".to_string()],
                     usage: "du -sh *".to_string(),
-                    tags: vec!["directories".to_string(), "size".to_string(), "disk".to_string()],
+                    tags: vec![
+                        "directories".to_string(),
+                        "size".to_string(),
+                        "disk".to_string(),
+                    ],
                     requires_sudo: false,
                     category: "files".to_string(),
                 },
@@ -288,16 +333,19 @@ pub fn load_categories() -> Vec<CommandCategory> {
                         "/".to_string(),
                         "-mtime".to_string(),
                         "-1".to_string(),
-                        "2>/dev/null".to_string()
+                        "2>/dev/null".to_string(),
                     ],
                     usage: "find / -mtime -1 2>/dev/null".to_string(),
-                    tags: vec!["files".to_string(), "recent".to_string(), "modified".to_string()],
+                    tags: vec![
+                        "files".to_string(),
+                        "recent".to_string(),
+                        "modified".to_string(),
+                    ],
                     requires_sudo: true,
                     category: "files".to_string(),
-                }
+                },
             ],
         },
-
         // Quick Commands
         CommandCategory {
             name: "Quick Commands".to_string(),
@@ -312,10 +360,14 @@ pub fn load_categories() -> Vec<CommandCategory> {
                         "&&".to_string(),
                         "apt".to_string(),
                         "upgrade".to_string(),
-                        "-y".to_string()
+                        "-y".to_string(),
                     ],
                     usage: "apt update && apt upgrade -y".to_string(),
-                    tags: vec!["update".to_string(), "upgrade".to_string(), "packages".to_string()],
+                    tags: vec![
+                        "update".to_string(),
+                        "upgrade".to_string(),
+                        "packages".to_string(),
+                    ],
                     requires_sudo: true,
                     category: "system".to_string(),
                 },
@@ -325,7 +377,11 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     command: "ip".to_string(),
                     args: vec!["addr".to_string(), "show".to_string()],
                     usage: "ip addr show".to_string(),
-                    tags: vec!["network".to_string(), "ip".to_string(), "interface".to_string()],
+                    tags: vec![
+                        "network".to_string(),
+                        "ip".to_string(),
+                        "interface".to_string(),
+                    ],
                     requires_sudo: false,
                     category: "network".to_string(),
                 },
@@ -335,7 +391,11 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     command: "who".to_string(),
                     args: vec![],
                     usage: "who".to_string(),
-                    tags: vec!["users".to_string(), "logged".to_string(), "session".to_string()],
+                    tags: vec![
+                        "users".to_string(),
+                        "logged".to_string(),
+                        "session".to_string(),
+                    ],
                     requires_sudo: false,
                     category: "system".to_string(),
                 },
@@ -345,12 +405,16 @@ pub fn load_categories() -> Vec<CommandCategory> {
                     command: "uptime".to_string(),
                     args: vec![],
                     usage: "uptime".to_string(),
-                    tags: vec!["uptime".to_string(), "load".to_string(), "system".to_string()],
+                    tags: vec![
+                        "uptime".to_string(),
+                        "load".to_string(),
+                        "system".to_string(),
+                    ],
                     requires_sudo: false,
                     category: "system".to_string(),
-                }
+                },
             ],
-        }
+        },
     ]
 }
 
@@ -398,7 +462,11 @@ pub async fn execute_direct_command(command_name: &str, config: &Config) -> Resu
 
     for category in &categories {
         for cmd in &category.commands {
-            if cmd.name.to_lowercase().contains(&command_name.to_lowercase()) {
+            if cmd
+                .name
+                .to_lowercase()
+                .contains(&command_name.to_lowercase())
+            {
                 println!("Executing: {}", cmd.name);
                 let output = execute_command(cmd, config).await?;
                 println!("{}", output);

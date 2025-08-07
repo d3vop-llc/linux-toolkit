@@ -1,5 +1,5 @@
 use anyhow::Result;
-use clap::{ Arg, Command };
+use clap::{Arg, Command};
 use std::io;
 
 mod app;
@@ -21,14 +21,14 @@ async fn main() -> Result<()> {
                 .short('c')
                 .long("config")
                 .value_name("FILE")
-                .help("Sets a custom config file")
+                .help("Sets a custom config file"),
         )
         .arg(
             Arg::new("command")
                 .short('x')
                 .long("execute")
                 .value_name("COMMAND")
-                .help("Execute a specific command directly")
+                .help("Execute a specific command directly"),
         )
         .get_matches();
 

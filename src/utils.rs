@@ -16,8 +16,7 @@ pub fn has_sudo() -> bool {
 
 /// Get the current username
 pub fn get_current_user() -> String {
-    std::env
-        ::var("USER")
+    std::env::var("USER")
         .or_else(|_| std::env::var("USERNAME"))
         .unwrap_or_else(|_| "unknown".to_string())
 }
@@ -69,10 +68,12 @@ pub fn extract_ips(text: &str) -> Vec<String> {
 /// Check if a port is open
 pub async fn is_port_open(host: &str, port: u16) -> bool {
     use tokio::net::TcpStream;
-    use tokio::time::{ timeout, Duration };
+    use tokio::time::{timeout, Duration};
 
     let address = format!("{}:{}", host, port);
-    timeout(Duration::from_secs(3), TcpStream::connect(&address)).await.is_ok()
+    timeout(Duration::from_secs(3), TcpStream::connect(&address))
+        .await
+        .is_ok()
 }
 
 /// Get system architecture
@@ -96,7 +97,10 @@ pub fn truncate_string(s: &str, max_len: usize) -> String {
 
 /// Escape shell arguments
 pub fn escape_shell_arg(arg: &str) -> String {
-    if arg.chars().any(|c| " \t\n\r\"'\\$`()[]{}|&;<>?*".contains(c)) {
+    if arg
+        .chars()
+        .any(|c| " \t\n\r\"'\\$`()[]{}|&;<>?*".contains(c))
+    {
         format!("'{}'", arg.replace('\'', "'\"'\"'"))
     } else {
         arg.to_string()
