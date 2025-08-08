@@ -1,0 +1,34 @@
+# Linux Toolkit Scripts Configuration
+# This file defines the available scripts and their categories
+
+# Example structure:
+
+# [scripts]
+
+# [scripts.network]
+# name = "Network Security"
+# description = "Network analysis and security tools"
+# directory = "network"
+
+# [[scripts.network.commands]]
+# name = "Port Scanner"
+# description = "Scan for open ports on a target host"
+# script = "port_scan.sh"
+# usage = "port_scan.sh <target_host> [start_port] [end_port]"
+# requires_sudo = false
+# tags = ["network", "security", "scanning"]
+
+[scripts]
+
+[scripts.network]
+name = "Network Security"
+description = "Network analysis and security tools"
+directory = "network"
+
+[[scripts.network.commands]]
+name = "Port Scanner"
+description = "See what ports are currently active on the system."
+script = "active_ports.sh"
+usage = "active_ports.sh"
+requires_sudo = true
+tags = ["network", "security", "ports", "active"]
