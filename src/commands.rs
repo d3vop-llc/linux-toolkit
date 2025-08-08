@@ -1,5 +1,5 @@
 use anyhow::Result;
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 use std::process::Stdio;
 use tokio::process::Command as TokioCommand;
 
@@ -50,7 +50,7 @@ fn load_builtin_categories() -> Vec<CommandCategory> {
                 tags: vec![
                     "security".to_string(),
                     "logs".to_string(),
-                    "authentication".to_string()
+                    "authentication".to_string(),
                 ],
                 requires_sudo: true,
                 category: "security".to_string(),
@@ -61,7 +61,11 @@ fn load_builtin_categories() -> Vec<CommandCategory> {
                 command: "cat".to_string(),
                 args: vec!["/etc/passwd".to_string()],
                 usage: "cat /etc/passwd".to_string(),
-                tags: vec!["users".to_string(), "accounts".to_string(), "system".to_string()],
+                tags: vec![
+                    "users".to_string(),
+                    "accounts".to_string(),
+                    "system".to_string(),
+                ],
                 requires_sudo: false,
                 category: "security".to_string(),
             },
@@ -76,10 +80,14 @@ fn load_builtin_categories() -> Vec<CommandCategory> {
                     "-o".to_string(),
                     "-perm".to_string(),
                     "-2000".to_string(),
-                    "2>/dev/null".to_string()
+                    "2>/dev/null".to_string(),
                 ],
                 usage: "find / -perm -4000 -o -perm -2000 2>/dev/null".to_string(),
-                tags: vec!["suid".to_string(), "privilege".to_string(), "escalation".to_string()],
+                tags: vec![
+                    "suid".to_string(),
+                    "privilege".to_string(),
+                    "escalation".to_string(),
+                ],
                 requires_sudo: true,
                 category: "security".to_string(),
             },
@@ -89,10 +97,14 @@ fn load_builtin_categories() -> Vec<CommandCategory> {
                 command: "lsof".to_string(),
                 args: vec!["-i".to_string()],
                 usage: "lsof -i".to_string(),
-                tags: vec!["files".to_string(), "network".to_string(), "monitoring".to_string()],
+                tags: vec![
+                    "files".to_string(),
+                    "network".to_string(),
+                    "monitoring".to_string(),
+                ],
                 requires_sudo: true,
                 category: "security".to_string(),
-            }
+            },
         ],
     }]
 }
@@ -113,18 +125,19 @@ pub async fn execute_command_in_terminal(command: &Command, config: &Config) -> 
     }
 
     // Build the command with proper shell handling
-    let has_shell_operators = command.args
-        .iter()
-        .any(|arg| {
-            arg.contains("&&") || arg.contains("|") || arg.contains(">") || arg.contains("<")
-        });
+    let has_shell_operators = command.args.iter().any(|arg| {
+        arg.contains("&&") || arg.contains("|") || arg.contains(">") || arg.contains("<")
+    });
 
     let should_use_sudo = command.requires_sudo;
 
     let (final_command, final_args) = if has_shell_operators {
         let full_command = format!("{} {}", command.command, command.args.join(" "));
         if should_use_sudo && !crate::utils::is_root() {
-            ("sudo".to_string(), vec!["sh".to_string(), "-c".to_string(), full_command])
+            (
+                "sudo".to_string(),
+                vec!["sh".to_string(), "-c".to_string(), full_command],
+            )
         } else {
             ("sh".to_string(), vec!["-c".to_string(), full_command])
         }
@@ -212,7 +225,10 @@ async fn execute_script_command_in_terminal(command: &Command) -> Result<()> {
     // Find the script path by looking in all categories
     let mut script_path = None;
     for (_, category) in &script_manager.config.scripts {
-        let potential_path = script_manager.scripts_dir.join(&category.directory).join(script_name);
+        let potential_path = script_manager
+            .scripts_dir
+            .join(&category.directory)
+            .join(script_name);
 
         if potential_path.exists() {
             script_path = Some(potential_path);
@@ -234,12 +250,9 @@ async fn execute_script_command_in_terminal(command: &Command) -> Result<()> {
     // Execute the script with any additional arguments
     let script_args: Vec<String> = command.args[1..].to_vec();
 
-    match
-        script_manager.execute_script_in_terminal(
-            &script_path,
-            &script_args,
-            command.requires_sudo
-        ).await
+    match script_manager
+        .execute_script_in_terminal(&script_path, &script_args, command.requires_sudo)
+        .await
     {
         Ok(_) => Ok(()),
         Err(e) => {
@@ -262,15 +275,16 @@ async fn execute_command_with_sudo_retry(command: &Command) -> Result<()> {
         let _ = StdCommand::new("clear").status();
     }
 
-    let has_shell_operators = command.args
-        .iter()
-        .any(|arg| {
-            arg.contains("&&") || arg.contains("|") || arg.contains(">") || arg.contains("<")
-        });
+    let has_shell_operators = command.args.iter().any(|arg| {
+        arg.contains("&&") || arg.contains("|") || arg.contains(">") || arg.contains("<")
+    });
 
     let (final_command, final_args) = if has_shell_operators {
         let full_command = format!("{} {}", command.command, command.args.join(" "));
-        ("sudo".to_string(), vec!["sh".to_string(), "-c".to_string(), full_command])
+        (
+            "sudo".to_string(),
+            vec!["sh".to_string(), "-c".to_string(), full_command],
+        )
     } else {
         let mut sudo_args = vec![command.command.clone()];
         sudo_args.extend(command.args.clone());
@@ -353,11 +367,9 @@ async fn execute_command_internal(command: &Command, use_sudo: bool) -> Result<S
     };
 
     // Add arguments
-    let has_shell_operators = command.args
-        .iter()
-        .any(|arg| {
-            arg.contains("&&") || arg.contains("|") || arg.contains(">") || arg.contains("<")
-        });
+    let has_shell_operators = command.args.iter().any(|arg| {
+        arg.contains("&&") || arg.contains("|") || arg.contains(">") || arg.contains("<")
+    });
 
     if has_shell_operators {
         if use_sudo && !crate::utils::is_root() {
@@ -395,9 +407,10 @@ async fn execute_command_internal(command: &Command, use_sudo: bool) -> Result<S
 
         // If it's a permission error, include that information
         if is_permission_denied_error(&stderr) {
-            return Ok(
-                format!("Permission denied. Try running with elevated privileges.\n{}", error_msg)
-            );
+            return Ok(format!(
+                "Permission denied. Try running with elevated privileges.\n{}",
+                error_msg
+            ));
         }
 
         return Ok(error_msg);
@@ -424,7 +437,10 @@ async fn execute_script_command(command: &Command, use_sudo: bool) -> Result<Str
     // Find the script path by looking in all categories
     let mut script_path = None;
     for (_, category) in &script_manager.config.scripts {
-        let potential_path = script_manager.scripts_dir.join(&category.directory).join(script_name);
+        let potential_path = script_manager
+            .scripts_dir
+            .join(&category.directory)
+            .join(script_name);
 
         if potential_path.exists() {
             script_path = Some(potential_path);
@@ -442,7 +458,10 @@ async fn execute_script_command(command: &Command, use_sudo: bool) -> Result<Str
     // Execute the script with any additional arguments
     let script_args: Vec<String> = command.args[1..].to_vec();
 
-    match script_manager.execute_script(&script_path, &script_args, use_sudo).await {
+    match script_manager
+        .execute_script(&script_path, &script_args, use_sudo)
+        .await
+    {
         Ok(output) => Ok(output),
         Err(e) => Ok(format!("Script execution error: {}", e)),
     }
@@ -462,23 +481,23 @@ fn should_retry_with_sudo(command: &Command, config: &Config) -> bool {
     // For specific commands that commonly need sudo
     matches!(
         command.command.as_str(),
-        "apt" |
-            "yum" |
-            "dnf" |
-            "zypper" |
-            "pacman" |
-            "systemctl" |
-            "service" |
-            "mount" |
-            "umount" |
-            "iptables" |
-            "ufw" |
-            "firewall-cmd" |
-            "netstat" |
-            "tcpdump" |
-            "nmap" |
-            "iwlist" |
-            "iwconfig"
+        "apt"
+            | "yum"
+            | "dnf"
+            | "zypper"
+            | "pacman"
+            | "systemctl"
+            | "service"
+            | "mount"
+            | "umount"
+            | "iptables"
+            | "ufw"
+            | "firewall-cmd"
+            | "netstat"
+            | "tcpdump"
+            | "nmap"
+            | "iwlist"
+            | "iwconfig"
     )
 }
 
@@ -495,7 +514,9 @@ fn is_permission_denied_error(stderr: &str) -> bool {
     ];
 
     let stderr_lower = stderr.to_lowercase();
-    permission_indicators.iter().any(|&indicator| stderr_lower.contains(indicator))
+    permission_indicators
+        .iter()
+        .any(|&indicator| stderr_lower.contains(indicator))
 }
 
 pub async fn execute_direct_command(command_name: &str, config: &Config) -> Result<()> {
@@ -503,7 +524,11 @@ pub async fn execute_direct_command(command_name: &str, config: &Config) -> Resu
 
     for category in &categories {
         for cmd in &category.commands {
-            if cmd.name.to_lowercase().contains(&command_name.to_lowercase()) {
+            if cmd
+                .name
+                .to_lowercase()
+                .contains(&command_name.to_lowercase())
+            {
                 println!("Executing: {}", cmd.name);
                 let output = execute_command(cmd, config).await?;
                 println!("{}", output);
@@ -521,7 +546,9 @@ fn merge_script_commands(categories: &mut Vec<CommandCategory>, script_manager: 
 
     for (script_category_name, script_commands) in script_categories {
         // Find existing category or create new one
-        let existing_category = categories.iter_mut().find(|cat| cat.name == script_category_name);
+        let existing_category = categories
+            .iter_mut()
+            .find(|cat| cat.name == script_category_name);
 
         if let Some(category) = existing_category {
             // Add script commands to existing category

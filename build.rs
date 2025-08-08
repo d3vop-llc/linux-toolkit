@@ -16,8 +16,13 @@ fn main() {
     writeln!(
         file,
         "pub fn get_embedded_scripts() -> std::collections::HashMap<&'static str, &'static [u8]> {{"
-    ).unwrap();
-    writeln!(file, "    let mut scripts = std::collections::HashMap::new();").unwrap();
+    )
+    .unwrap();
+    writeln!(
+        file,
+        "    let mut scripts = std::collections::HashMap::new();"
+    )
+    .unwrap();
 
     // Embed the scripts directory
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
@@ -30,7 +35,10 @@ fn main() {
     writeln!(file, "    scripts").unwrap();
     writeln!(file, "}}").unwrap();
 
-    println!("cargo:rustc-env=EMBEDDED_SCRIPTS_PATH={}", dest_path.display());
+    println!(
+        "cargo:rustc-env=EMBEDDED_SCRIPTS_PATH={}",
+        dest_path.display()
+    );
 }
 
 fn embed_scripts_recursively(base_dir: &Path, current_dir: &Path, file: &mut fs::File) {
@@ -57,9 +65,9 @@ fn embed_scripts_recursively(base_dir: &Path, current_dir: &Path, file: &mut fs:
                     writeln!(
                         file,
                         "    scripts.insert(\"{}\", include_bytes!(r\"{}\") as &'static [u8]);",
-                        relative_str,
-                        include_path
-                    ).unwrap();
+                        relative_str, include_path
+                    )
+                    .unwrap();
 
                     println!("cargo:rerun-if-changed={}", path.display());
                 }
