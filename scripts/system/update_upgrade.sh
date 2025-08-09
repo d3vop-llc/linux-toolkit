@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Please select an option:"
-options=("Apt" "Pacman" "Dnf" "Yum" "Zypper" "Apk" "Emerge" "Exit")
+options=("Apt" "Pacman" "Dnf" "Yum" "Zypper" "Apk" "Emerge" "Xbps" "Eopkg" "Slackpkg" "Nix-channel + Nix-env" "Nixos-Rebuild" "Exit")
 
 select opt in "${options[@]}"
 do
@@ -39,6 +39,31 @@ do
         "Emerge")
             echo "Updating system..."
             sudo emerge --sync && sudo emerge -uUD @world
+            break
+            ;;
+        "Xbps")
+            echo "Updating system..."
+            sudo xbps-install -Suv
+            break
+            ;;
+        "Eopkg")
+            echo "Updating system..."
+            sudo eopkg upgrade
+            break
+            ;;
+        "Slackpkg")
+            echo "Updating system..."
+            sudo slackpkg update && sudo slackpkg upgrade-all
+            break
+            ;;
+        "Nix-channel + Nix-env")
+            echo "Updating system..."
+            sudo nix-channel --update && sudo nix-env -u --always
+            break
+            ;;
+        "Nixos-Rebuild")
+            echo "Updating system..."
+            sudo nixos-rebuild switch --upgrade
             break
             ;;
         "Exit")
