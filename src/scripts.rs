@@ -1,8 +1,8 @@
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 use std::collections::HashMap;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::{ Path, PathBuf };
 
 // Include the embedded scripts
 include!(concat!(env!("OUT_DIR"), "/embedded_scripts.rs"));
@@ -64,8 +64,10 @@ impl ScriptManager {
             for command in &category.commands {
                 let script_path = category_dir.join(&command.script);
                 if !script_path.exists() {
-                    let default_script_content =
-                        Self::create_default_script(&command.script, &command.description);
+                    let default_script_content = Self::create_default_script(
+                        &command.script,
+                        &command.description
+                    );
                     fs::write(&script_path, default_script_content)?;
 
                     // Make script executable on Unix systems
@@ -131,10 +133,12 @@ impl ScriptManager {
     /// Get the executable directory (where the binary is located)
     pub fn get_executable_dir() -> Result<PathBuf> {
         let exe_path = std::env::current_exe()?;
-        Ok(exe_path
-            .parent()
-            .unwrap_or_else(|| Path::new("."))
-            .to_path_buf())
+        Ok(
+            exe_path
+                .parent()
+                .unwrap_or_else(|| Path::new("."))
+                .to_path_buf()
+        )
     }
 
     /// Create a new ScriptManager using the directory where the executable is located
@@ -192,7 +196,7 @@ impl ScriptManager {
                     "network".to_string(),
                     "security".to_string(),
                     "ports".to_string(),
-                    "active".to_string(),
+                    "active".to_string()
                 ],
             }],
         };
@@ -204,7 +208,8 @@ impl ScriptManager {
 
     fn create_default_script(script_name: &str, description: &str) -> String {
         match script_name {
-            "active_ports.sh" => r#"#!/bin/bash
+            "active_ports.sh" =>
+                r#"#!/bin/bash
 # Linux Toolkit Script: Active Ports Scanner
 # Description: See what ports are currently active on the system.
 
@@ -230,8 +235,7 @@ if command -v netstat >/dev/null 2>&1; then
 elif command -v ss >/dev/null 2>&1; then
     ss -tuln | grep LISTEN | awk '{print $4}' | sort -u
 fi
-"#
-            .to_string(),
+"#.to_string(),
             _ => {
                 format!(
                     r#"#!/bin/bash
@@ -245,7 +249,10 @@ echo "Please edit this script to add your functionality."
 # Add your script logic here
 echo "Script executed successfully!"
 "#,
-                    script_name, description, script_name, description
+                    script_name,
+                    description,
+                    script_name,
+                    description
                 )
             }
         }
@@ -258,10 +265,7 @@ echo "Script executed successfully!"
             let mut available_commands = Vec::new();
 
             for command in &category.commands {
-                let script_path = self
-                    .scripts_dir
-                    .join(&category.directory)
-                    .join(&command.script);
+                let script_path = self.scripts_dir.join(&category.directory).join(&command.script);
 
                 if script_path.exists() {
                     available_commands.push(command.clone());
@@ -269,9 +273,14 @@ echo "Script executed successfully!"
             }
 
             if !available_commands.is_empty() {
+                // Sort commands alphabetically by name
+                available_commands.sort_by(|a, b| a.name.cmp(&b.name));
                 scripts.push((category.name.clone(), available_commands));
             }
         }
+
+        // Sort script categories alphabetically by name
+        scripts.sort_by(|a, b| a.0.cmp(&b.0));
 
         scripts
     }
@@ -280,7 +289,7 @@ echo "Script executed successfully!"
         &self,
         script_path: &Path,
         args: &[String],
-        use_sudo: bool,
+        use_sudo: bool
     ) -> Result<String> {
         use std::process::Stdio;
         use tokio::process::Command;
@@ -354,7 +363,7 @@ echo "Script executed successfully!"
         &self,
         script_path: &Path,
         args: &[String],
-        use_sudo: bool,
+        use_sudo: bool
     ) -> Result<()> {
         use std::process::Command as StdCommand;
 
@@ -380,10 +389,12 @@ echo "Script executed successfully!"
                 // On Windows, try to run with elevated privileges
                 let mut ps_cmd = StdCommand::new("powershell");
                 ps_cmd.arg("-Command");
-                ps_cmd.arg(format!(
-                    "Start-Process -FilePath 'bash' -ArgumentList '{}' -Verb RunAs -Wait",
-                    script_path.display()
-                ));
+                ps_cmd.arg(
+                    format!(
+                        "Start-Process -FilePath 'bash' -ArgumentList '{}' -Verb RunAs -Wait",
+                        script_path.display()
+                    )
+                );
                 ps_cmd
             } else {
                 let mut sudo_cmd = StdCommand::new("sudo");

@@ -1,5 +1,5 @@
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 use std::fs;
 use std::path::PathBuf;
 
@@ -104,17 +104,5 @@ impl Config {
         let content = toml::to_string_pretty(self)?;
         fs::write(path, content)?;
         Ok(())
-    }
-
-    pub fn get_config_path(&self) -> PathBuf {
-        self.directories.config_dir.join("config.toml")
-    }
-
-    pub fn get_history_path(&self) -> PathBuf {
-        self.directories.data_dir.join("command_history.json")
-    }
-
-    pub fn get_cache_path(&self) -> PathBuf {
-        self.directories.cache_dir.join("cache.json")
     }
 }
