@@ -45,3 +45,19 @@ script = "active_ports.sh"
 usage = "active_ports.sh"
 requires_sudo = true
 tags = ["network", "security", "ports", "active"]
+
+[[scripts.network.commands]]
+name = "Enable Firewall"
+description = "Enable and configure the Uncomplicated Firewall (UFW)."
+script = "enable_firewall.sh"
+usage = "enable_firewall.sh"
+requires_sudo = true
+tags = ["network", "security", "firewall", "ufw"]
+
+[[scripts.network.commands]]
+name = "Secure SSH"
+description = "Secure the SSH service."
+script = "secure_ssh.sh"
+usage = "secure_ssh.sh"
+requires_sudo = true
+tags = ["network", "security", "firewall", "ufw"]
