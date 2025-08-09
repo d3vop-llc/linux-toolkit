@@ -9,7 +9,7 @@ Successor to [auto-secure-linux](https://github.com/d3vop-llc/auto-secure-linux)
 ### All in one command
 
 ```bash
-sudo curl -L "https://github.com/d3vop-llc/linux-toolkit/releases/download/v0.1.7/linux-toolkit" -o /usr/bin/linux-toolkit
+sudo curl -L "https://github.com/d3vop-llc/linux-toolkit/releases/download/v0.1.8/linux-toolkit" -o /usr/bin/linux-toolkit
 sudo chmod +x /usr/bin/linux-toolkit
 linux-toolkit
 ```
@@ -19,7 +19,7 @@ linux-toolkit
 Download binary
 
 ```bash
-sudo curl -L "https://github.com/d3vop-llc/linux-toolkit/releases/download/v0.1.7/linux-toolkit" -o /usr/bin/linux-toolkit
+sudo curl -L "https://github.com/d3vop-llc/linux-toolkit/releases/download/v0.1.8/linux-toolkit" -o /usr/bin/linux-toolkit
 ```
 
 Allow binary to be executed
