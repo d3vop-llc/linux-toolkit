@@ -15,6 +15,7 @@ sudo unzip /opt/linux-toolkit/linux-toolkit_full.zip -d /opt/linux-toolkit
 sudo rm -rf /opt/linux-toolkit/linux-toolkit_full.zip
 sudo chmod +x /opt/linux-toolkit/linux-toolkit
 sudo ln -s /opt/linux-toolkit/linux-toolkit /usr/bin/linux-toolkit
+sudo chmod +x /usr/bin/linux-toolkit
 ```
 
 To start:
