@@ -20,6 +20,19 @@
 
 [scripts]
 
+[scripts.system]
+name = "System Utilities"
+description = "General system utilities and maintenance scripts"
+directory = "system"
+
+[[scripts.system.commands]]
+name = "Update and Upgrade System"
+description = "Update and upgrade installed packages"
+script = "update_upgrade.sh"
+usage = "update_upgrade.sh"
+requires_sudo = true
+tags = ["system", "maintenance", "updates"]
+
 [scripts.network]
 name = "Network Security"
 description = "Network analysis and security tools"
