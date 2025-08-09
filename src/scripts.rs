@@ -1,8 +1,8 @@
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 use std::collections::HashMap;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::{ Path, PathBuf };
 
 // Include the embedded scripts
 include!(concat!(env!("OUT_DIR"), "/embedded_scripts.rs"));
@@ -55,6 +55,37 @@ impl ScriptManager {
             default_config
         };
 
+        // Create directories for all categories in the config
+        for (_, category) in &config.scripts {
+            let category_dir = scripts_dir.join(&category.directory);
+            fs::create_dir_all(&category_dir)?;
+
+            // Create default script files if they don't exist
+            for command in &category.commands {
+                let script_path = category_dir.join(&command.script);
+                if !script_path.exists() {
+                    let default_script_content = Self::create_default_script(
+                        &command.script,
+                        &command.description
+                    );
+                    fs::write(&script_path, default_script_content)?;
+
+                    // Make script executable on Unix systems
+                    #[cfg(unix)]
+                    {
+                        if script_path.extension().and_then(|s| s.to_str()) == Some("sh") {
+                            use std::os::unix::fs::PermissionsExt;
+                            let mut perms = fs::metadata(&script_path)?.permissions();
+                            perms.set_mode(0o755); // rwxr-xr-x
+                            fs::set_permissions(&script_path, perms)?;
+                        }
+                    }
+
+                    // Created default script (silent for TUI)
+                }
+            }
+        }
+
         Ok(Self {
             config,
             scripts_dir,
@@ -63,6 +94,9 @@ impl ScriptManager {
 
     /// Extract embedded scripts to the file system if they don't exist
     fn extract_embedded_scripts(scripts_dir: &Path) -> Result<()> {
+        // Ensure the scripts directory exists
+        fs::create_dir_all(scripts_dir)?;
+
         let embedded_scripts = get_embedded_scripts();
 
         for (relative_path, content) in embedded_scripts {
@@ -89,7 +123,7 @@ impl ScriptManager {
                     }
                 }
 
-                println!("Extracted script: {}", relative_path);
+                // Extracted script (silent for TUI)
             }
         }
 
@@ -99,30 +133,137 @@ impl ScriptManager {
     /// Get the executable directory (where the binary is located)
     pub fn get_executable_dir() -> Result<PathBuf> {
         let exe_path = std::env::current_exe()?;
-        Ok(exe_path
-            .parent()
-            .unwrap_or_else(|| Path::new("."))
-            .to_path_buf())
+        Ok(
+            exe_path
+                .parent()
+                .unwrap_or_else(|| Path::new("."))
+                .to_path_buf()
+        )
     }
 
     /// Create a new ScriptManager using the directory where the executable is located
+    /// Falls back to user data directory if executable directory is not writable
     pub fn new_from_exe() -> Result<Self> {
         let exe_dir = Self::get_executable_dir()?;
-        Self::new(&exe_dir)
+
+        // Test if we can write to the executable directory
+        if Self::is_directory_writable(&exe_dir) {
+            Self::new(&exe_dir)
+        } else {
+            // If that fails (e.g., no write permissions), use user data directory
+            let home_dir = dirs::home_dir().unwrap_or_else(|| PathBuf::from("/tmp"));
+            let user_scripts_dir = home_dir.join(".local").join("share").join("linux-toolkit");
+            Self::new(&user_scripts_dir)
+        }
+    }
+
+    /// Check if a directory is writable by trying to create a test file
+    fn is_directory_writable(dir: &Path) -> bool {
+        // If directory doesn't exist, try to create it first
+        if !dir.exists() {
+            if let Err(_) = fs::create_dir_all(dir) {
+                return false;
+            }
+        }
+
+        // Try to create a temporary file to test write permissions
+        let test_file = dir.join(".write_test");
+        match fs::write(&test_file, b"test") {
+            Ok(_) => {
+                // Clean up the test file
+                let _ = fs::remove_file(&test_file);
+                true
+            }
+            Err(_) => false,
+        }
     }
 
     fn create_default_config() -> ScriptsConfig {
+        let mut scripts = HashMap::new();
+
+        // Create a default network category with example scripts
+        let network_category = ScriptCategory {
+            name: "Network Security".to_string(),
+            description: "Network analysis and security tools".to_string(),
+            directory: "network".to_string(),
+            commands: vec![ScriptCommand {
+                name: "Port Scanner".to_string(),
+                description: "See what ports are currently active on the system.".to_string(),
+                script: "active_ports.sh".to_string(),
+                usage: "active_ports.sh".to_string(),
+                requires_sudo: true,
+                tags: vec![
+                    "network".to_string(),
+                    "security".to_string(),
+                    "ports".to_string(),
+                    "active".to_string()
+                ],
+            }],
+        };
+
+        scripts.insert("network".to_string(), network_category);
+
         ScriptsConfig {
-            scripts: HashMap::new(),
+            scripts,
+        }
+    }
+
+    fn create_default_script(script_name: &str, description: &str) -> String {
+        match script_name {
+            "active_ports.sh" => {
+                r#"#!/bin/bash
+# Linux Toolkit Script: Active Ports Scanner
+# Description: See what ports are currently active on the system.
+
+echo "=== Active Network Connections ==="
+echo
+
+# Check if netstat is available
+if command -v netstat >/dev/null 2>&1; then
+    echo "Using netstat to show active connections:"
+    netstat -tuln
+elif command -v ss >/dev/null 2>&1; then
+    echo "Using ss to show active connections:"
+    ss -tuln
+else
+    echo "Neither netstat nor ss are available. Please install net-tools or iproute2."
+    exit 1
+fi
+
+echo
+echo "=== Listening Ports Summary ==="
+if command -v netstat >/dev/null 2>&1; then
+    netstat -tuln | grep LISTEN | awk '{print $4}' | sort -u
+elif command -v ss >/dev/null 2>&1; then
+    ss -tuln | grep LISTEN | awk '{print $4}' | sort -u
+fi
+"#.to_string()
+            }
+            _ => {
+                format!(
+                    r#"#!/bin/bash
+# Linux Toolkit Script: {}
+# Description: {}
+
+echo "This is a placeholder script for: {}"
+echo "Description: {}"
+echo "Please edit this script to add your functionality."
+
+# Add your script logic here
+echo "Script executed successfully!"
+"#,
+                    script_name,
+                    description,
+                    script_name,
+                    description
+                )
+            }
         }
     }
 
     pub fn get_script_path(&self, category: &str, script_name: &str) -> Option<PathBuf> {
         if let Some(category_config) = self.config.scripts.get(category) {
-            let script_path = self
-                .scripts_dir
-                .join(&category_config.directory)
-                .join(script_name);
+            let script_path = self.scripts_dir.join(&category_config.directory).join(script_name);
 
             if script_path.exists() {
                 Some(script_path)
@@ -141,10 +282,7 @@ impl ScriptManager {
             let mut available_commands = Vec::new();
 
             for command in &category.commands {
-                let script_path = self
-                    .scripts_dir
-                    .join(&category.directory)
-                    .join(&command.script);
+                let script_path = self.scripts_dir.join(&category.directory).join(&command.script);
 
                 if script_path.exists() {
                     available_commands.push(command.clone());
@@ -163,8 +301,7 @@ impl ScriptManager {
         for (category_name, category) in &self.config.scripts {
             for command in &category.commands {
                 if command.name.to_lowercase() == name.to_lowercase() {
-                    let script_path = self
-                        .scripts_dir
+                    let script_path = self.scripts_dir
                         .join(&category.directory)
                         .join(&command.script);
 
@@ -181,7 +318,7 @@ impl ScriptManager {
         &self,
         script_path: &Path,
         args: &[String],
-        use_sudo: bool,
+        use_sudo: bool
     ) -> Result<String> {
         use std::process::Stdio;
         use tokio::process::Command;
@@ -255,7 +392,7 @@ impl ScriptManager {
         &self,
         script_path: &Path,
         args: &[String],
-        use_sudo: bool,
+        use_sudo: bool
     ) -> Result<()> {
         use std::process::Command as StdCommand;
 
@@ -281,10 +418,12 @@ impl ScriptManager {
                 // On Windows, try to run with elevated privileges
                 let mut ps_cmd = StdCommand::new("powershell");
                 ps_cmd.arg("-Command");
-                ps_cmd.arg(format!(
-                    "Start-Process -FilePath 'bash' -ArgumentList '{}' -Verb RunAs -Wait",
-                    script_path.display()
-                ));
+                ps_cmd.arg(
+                    format!(
+                        "Start-Process -FilePath 'bash' -ArgumentList '{}' -Verb RunAs -Wait",
+                        script_path.display()
+                    )
+                );
                 ps_cmd
             } else {
                 let mut sudo_cmd = StdCommand::new("sudo");
