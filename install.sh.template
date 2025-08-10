@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+
+echo "Installing Linux Toolkit - Made by D3vop and GitHub Collaborators..."
+sudo mkdir -p /opt/linux-toolkit
+echo "Obtaining files..."
+sudo curl -L "https://github.com/d3vop-llc/linux-toolkit/releases/download/v0.1.14/linux-toolkit_full.zip" -o /opt/linux-toolkit/linux-toolkit_full.zip
+if [[ ! -f /opt/linux-toolkit/linux-toolkit_full.zip ]]; then
+    echo "Download failed"
+    exit 1
+fi
+sudo unzip /opt/linux-toolkit/linux-toolkit_full.zip -d /opt/linux-toolkit
+echo "Removing temporary files..."
+sudo rm -f /opt/linux-toolkit/linux-toolkit_full.zip
+echo "Making it easy to find..."
+sudo chmod +x /opt/linux-toolkit/linux-toolkit
+sudo rm -f /usr/bin/linux-toolkit
+sudo ln -s /opt/linux-toolkit/linux-toolkit /usr/bin/linux-toolkit
+echo "Finished Installation!"
