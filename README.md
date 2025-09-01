@@ -6,6 +6,16 @@ Successor to [auto-secure-linux](https://github.com/d3vop-llc/auto-secure-linux)
 
 **If `curl` doesn't work, then change `v0.1.14` to current highest (or preferred) version.**
 
+### Simple
+
+1. Grab the latest `install.sh` from the binaries section of the latest [release](https://github.com/d3vop-llc/linux-toolkit/releases/).
+2. Download the `install.sh` file.
+3. `cd` into the directory where you downloaded it.
+4. Run:
+```bash
+./install.sh
+```
+
 ### All in one command
 
 ```bash
