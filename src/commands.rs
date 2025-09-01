@@ -571,7 +571,7 @@ fn merge_script_commands(categories: &mut Vec<CommandCategory>, script_manager: 
             // Add script commands to existing category
             for script_cmd in script_commands {
                 let command = Command {
-                    name: format!("📜 {}", script_cmd.name),
+                    name: format!("{}", script_cmd.name),
                     description: script_cmd.description,
                     command: "script".to_string(), // Special marker for script commands
                     args: vec![script_cmd.script],
@@ -587,7 +587,7 @@ fn merge_script_commands(categories: &mut Vec<CommandCategory>, script_manager: 
             let mut commands = Vec::new();
             for script_cmd in script_commands {
                 let command = Command {
-                    name: format!("📜 {}", script_cmd.name),
+                    name: format!("{}", script_cmd.name),
                     description: script_cmd.description,
                     command: "script".to_string(), // Special marker for script commands
                     args: vec![script_cmd.script],

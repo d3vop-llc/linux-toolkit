@@ -61,3 +61,16 @@ script = "secure_ssh.sh"
 usage = "secure_ssh.sh"
 requires_sudo = true
 tags = ["network", "security", "firewall", "ufw"]
+
+[scripts.install]
+name = "Installation Scripts"
+description = "Scripts for installing and configuring software"
+directory = "install"
+
+[[scripts.install.commands]]
+name = "Install Node.js"
+description = "Install Node.js via NVM."
+script = "install_nodejs.sh"
+usage = "install_nodejs.sh"
+requires_sudo = true
+tags = ["install", "nodejs", "management"]
