@@ -13,6 +13,6 @@ toml = "0.8"
 anyhow = "1.0"
 clap = { version = "4.0", features = ["derive"] }
 dirs = "5.0"
-which = "6.0"
+which = "8.0"
 colored = "2.0"
 regex = "1.0"
